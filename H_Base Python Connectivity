@@ -1,0 +1,54 @@
+import happybase
+host='192.168.56.101'
+def connection(host):
+    try:
+        conn=happybase.Connection(host,autoconnect=False)
+        conn.open()
+        print('Connected')
+        return conn
+    except Exception as er:
+        print('Failed Connection',er, 'please check your connection')
+        return None
+
+conn = connection(host)
+if conn:
+    print("Connected")
+else:
+    exit()
+
+
+def print_tables(table):
+    for k,v in table.scan():
+        print('Row-key:',k,'Values are',v)
+
+
+def create_table(name, n,cf="cf"):
+    dic = {}
+    for i in range(n):
+        dic[f"{cf}{i+1}"] = dict()
+    conn.create_table(
+        name,
+        dic
+    )
+
+def inserting_values(name,cf,id,val):
+    di={}
+    for i in range(2):
+        key=f'{cf}{i+1}:{id}'
+        di[key]=val
+    print(di)
+    name.put(name,di)
+
+def row_del(row_name):
+    tab_1.delete(row_name)
+
+def col_del(row_key,cf,col):
+    tab_1.delete(row_key,columns=[f'{cf}:{col}'])
+print(conn.tables())
+
+
+name=input('Enter table name:')
+n=int(input('Enter the number of column family:'))
+
+create_table('xyz',2)
+print(conn.tables())

@@ -1,0 +1,85 @@
+import happybase
+host=input('Enter the Hostname')
+def connection(host):
+    try:
+        conn=happybase.Connection(host,autoconnect=False)
+        conn.open()
+        print('Connected')
+        return conn
+    except Exception as er:
+        print('Failed Connection',er, 'please check your connection')
+        return None
+
+conn = connection(host)
+if conn:
+    print("Connected")
+else:
+    exit()
+
+
+def print_tables(table):
+    for k,v in table.scan():
+        print('Row-key:',k,'Values are',v)
+
+
+def create_table(name, n,cf="cf"):
+    dic = {}
+    for i in range(n):
+        dic[f"{cf}{i+1}"] = dict()
+    conn.create_table(
+        name,
+        dic
+    )
+
+def inserting_values(name,cf,id,val):
+    di={}
+    for i in range(2):
+        key=f'{cf}{i+1}:{id}'
+        di[key]=val
+    print(di)
+    name.put(name,di)
+
+#def row_del(row_name):
+ #   tab_1.delete(row_name)
+
+#def col_del(row_key,cf,col):
+ #   tab_1.delete(row_key,columns=[f'{cf}:{col}'])
+print(conn.tables())
+
+choice=int(input('The following options in hbase are:1)Creating table 2)inserting the Values 3)Displaying the Values 4)Deleting the row 5)Deleting the Columns'))
+if choice==1:
+    name = input('Enter table name:')
+    n = int(input('Enter the number of column family:'))
+    col_family = input("Enter the column family:")
+    table = conn.tables(name)
+    create_table(name, n,col_family)
+
+elif choice==2:
+    name=input('Enter the table name:')
+    col_family = input("Enter the column family:")
+    sub_col_family=input('Enter the sub_col_family:')
+    val=input("Enter the value to insert:")
+    table = conn.tables(name)
+    inserting_values(name,col_family,sub_col_family,val)
+
+elif choice==3:
+    name = input('Enter table name:')
+    table = conn.tables(name)
+    print_tables(name)
+
+elif choice==4:
+    name = input('Enter table name:')
+    row=input('Enter the row to delete:')
+    table=conn.tables(name)
+    table.delete(row)
+
+elif choice==5:
+    name = input('Enter table name:')
+    row = input('Enter the row to delete:')
+    col_family = input("Enter the column family:")
+    sub_col_family = input('Enter the sub_col_family:')
+    table = conn.tables(name)
+    table.delete(row,columns=[f'{col_family}:{sub_col_family}'])
+
+else:
+    print('------------Invalid Choice------------------')
